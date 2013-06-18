@@ -89,6 +89,16 @@ RULE_GENERATORS = [
     HEADER_RuleGenerator()
 ]
 
+class MakeOptions:
+    def __init__(self):
+        self.c_compiler = "gcc"
+        self.cpp_compiler = "g++"
+        self.makefile = "Makefile"
+        self.sources = []
+        self.executable = "a.out"
+        self.link_libraries = []
+        self.defines = []
+
 class MakeGen:
 
     def __init__(self):
@@ -97,13 +107,14 @@ class MakeGen:
             for ext in generator.handled_extensions():
                 self.rule_generator[ext] = generator
 
-    def generate_makefile(self, source_files, makefile_filename="Makefile"
-                          , exe_name="a.out"):
+    def generate_makefile(self, options):
+        makefile_filename = options.makefile
+        exe_name = options.executable
+        source_files = options.sources
+        c_compiler = options.c_compiler
+        cpp_compiler = options.cpp_compiler
 
-        c_compiler = None
-        cpp_compiler = None
         object_files = []
-
         for f in source_files:
             base, ext = self.__split_extension(f)
             if ext in C_RuleGenerator().handled_extensions():
@@ -168,6 +179,9 @@ if __name__ == "__main__":
                         help="the name of the output executable")
     arg = parser.parse_args()
 
+    options = MakeOptions()
+    options.sources = arg.file
+    options.executable = arg.exe
+
     makegen = MakeGen()
-    makegen.generate_makefile(arg.file
-                              , exe_name=arg.exe)
+    makegen.generate_makefile(options)
