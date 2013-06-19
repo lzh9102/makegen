@@ -93,9 +93,9 @@ class MakeOptions:
     def __init__(self):
         self.c_compiler = "gcc"
         self.cpp_compiler = "g++"
-        self.output = "Makefile"
+        self.output = None
         self.sources = []
-        self.executable = "a.out"
+        self.executable = None
         self.link_libraries = []
         self.defines = []
 
@@ -121,7 +121,10 @@ class MakeGen:
                 cpp_compiler = options.cpp_compiler
                 object_files.append(base + ".o")
 
-        with open(options.output, "w") as output_file:
+        makefile = options.output
+        if not makefile:
+            makefile = "Makefile"
+        with open(makefile, "w") as output_file:
             # variables
             if c_compiler:
                 output_file.write("CC=%s\n" % (c_compiler))
@@ -168,6 +171,30 @@ class MakeGen:
         rule = generator.generate_rule(filename)
         output_file.write(rule)
 
+class CMakeGen:
+
+    def generate(self, options):
+        cmakelists = options.output
+        if not cmakelists:
+            cmakelists = "CMakeLists.txt"
+        with open(cmakelists, "w") as output_file:
+            output_file.write("project(project_name)\n")
+            output_file.write("add_executable(%1s\n" % (options.executable))
+            for f in options.sources:
+                output_file.write("\t%1s\n" % (f))
+            output_file.write(")\n")
+
+GENERATORS = {
+    "make": MakeGen(),
+    "cmake": CMakeGen()
+}
+
+def list_generators():
+    generators = []
+    for gen in GENERATORS:
+        generators.append(gen)
+    return ', '.join(generators)
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description="Generate makefile from source files.")
@@ -175,11 +202,17 @@ if __name__ == "__main__":
                         help="source files")
     parser.add_argument("--exe", type=str, default="a.out",
                         help="the name of the output executable")
+    parser.add_argument("-f", "--format", default="make",
+                        help="format of the output makefile.")
     arg = parser.parse_args()
 
     options = MakeOptions()
     options.sources = arg.file
     options.executable = arg.exe
 
-    makegen = MakeGen()
-    makegen.generate(options)
+    if arg.format in GENERATORS:
+        generator = GENERATORS[arg.format]
+        generator.generate(options)
+    else:
+        print("error: unknown format %1s" % arg.format)
+        print("supported formats are: %1s" % list_generators())
