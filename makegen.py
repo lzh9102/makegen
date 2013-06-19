@@ -93,7 +93,7 @@ class MakeOptions:
     def __init__(self):
         self.c_compiler = "gcc"
         self.cpp_compiler = "g++"
-        self.makefile = "Makefile"
+        self.output = "Makefile"
         self.sources = []
         self.executable = "a.out"
         self.link_libraries = []
@@ -121,7 +121,7 @@ class MakeGen:
                 cpp_compiler = options.cpp_compiler
                 object_files.append(base + ".o")
 
-        with open(options.makefile, "w") as output_file:
+        with open(options.output, "w") as output_file:
             # variables
             if c_compiler:
                 output_file.write("CC=%s\n" % (c_compiler))
