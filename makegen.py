@@ -108,23 +108,20 @@ class MakeGen:
                 self.rule_generator[ext] = generator
 
     def generate_makefile(self, options):
-        makefile_filename = options.makefile
-        exe_name = options.executable
-        source_files = options.sources
-        c_compiler = options.c_compiler
-        cpp_compiler = options.cpp_compiler
-
+        c_compiler = None
+        cpp_compiler = None
         object_files = []
-        for f in source_files:
+
+        for f in options.sources:
             base, ext = self.__split_extension(f)
             if ext in C_RuleGenerator().handled_extensions():
-                c_compiler = "gcc"
+                c_compiler = options.c_compiler
                 object_files.append(base + ".o")
             elif ext in CPP_RuleGenerator().handled_extensions():
-                cpp_compiler = "g++"
+                cpp_compiler = options.cpp_compiler
                 object_files.append(base + ".o")
 
-        with open(makefile_filename, "w") as output_file:
+        with open(options.makefile, "w") as output_file:
             # variables
             if c_compiler:
                 output_file.write("CC=%s\n" % (c_compiler))
@@ -139,14 +136,15 @@ class MakeGen:
 
             # executable
             if object_files:
-                output_file.write("%1s: $(OBJS)\n" % (exe_name))
+                output_file.write("%1s: $(OBJS)\n" % (options.executable))
                 linker = "$(CC)"
                 if cpp_compiler:
                     linker = "$(CXX)"
-                output_file.write("\t%1s -o %2s $(LDFLAGS) $(OBJS)\n\n" % (linker, exe_name))
+                output_file.write("\t%1s -o %2s $(LDFLAGS) $(OBJS)\n\n"
+                                  % (linker, options.executable))
 
             # object files
-            for f in source_files:
+            for f in options.sources:
                 self.__generate_rule(f, output_file)
 
             # clean
@@ -154,7 +152,7 @@ class MakeGen:
             for f in object_files:
                 output_file.write("\trm -f %s\n" % (f)) # remove *.o
             if object_files:
-                output_file.write("\trm -f %s\n" % (exe_name)) # remove executable
+                output_file.write("\trm -f %s\n" % (options.executable))
 
     def __split_extension(self, filename):
         name, ext = os.path.splitext(filename)
