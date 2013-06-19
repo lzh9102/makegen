@@ -107,7 +107,7 @@ class MakeGen:
             for ext in generator.handled_extensions():
                 self.rule_generator[ext] = generator
 
-    def generate_makefile(self, options):
+    def generate(self, options):
         c_compiler = None
         cpp_compiler = None
         object_files = []
@@ -182,4 +182,4 @@ if __name__ == "__main__":
     options.executable = arg.exe
 
     makegen = MakeGen()
-    makegen.generate_makefile(options)
+    makegen.generate(options)
