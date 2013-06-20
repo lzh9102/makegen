@@ -98,6 +98,8 @@ class MakeOptions:
         self.output = None
         self.link_libraries = []
         self.defines = []
+        self.library_paths = []
+        self.include_paths = []
 
 class MakeGen:
 
@@ -112,7 +114,7 @@ class MakeGen:
         cpp_compiler = None
         object_files = []
         link_libraries = options.link_libraries
-        define_flags = self.__define_flags(options.defines)
+        compiler_flags = self.__compiler_flags(options)
 
         for f in options.sources:
             base, ext = self.__split_extension(f)
@@ -127,16 +129,16 @@ class MakeGen:
             # variables
             if c_compiler:
                 output_file.write("CC=%s\n" % (c_compiler))
-                output_file.write("CFLAGS=-g -Wall -O2 %(DEFINES)s\n"
-                                  % {"DEFINES": define_flags})
+                output_file.write("CFLAGS=-g -Wall -O2 %(FLAGS)s\n"
+                                  % {"FLAGS": compiler_flags})
             if cpp_compiler:
                 output_file.write("CXX=%s\n" % (cpp_compiler))
-                output_file.write("CXXFLAGS=-g -Wall -O2 %(DEFINES)s\n"
-                                  % {"DEFINES": define_flags})
+                output_file.write("CXXFLAGS=-g -Wall -O2 %(FLAGS)s\n"
+                                  % {"FLAGS": compiler_flags})
             if object_files:
                 output_file.write("OBJS=%s\n" % (' '.join(object_files)))
                 output_file.write("LDFLAGS=%s\n"
-                                  % (self.__linker_flags(link_libraries)))
+                                  % (self.__linker_flags(options)))
             output_file.write("\n")
 
             # executable
@@ -159,16 +161,20 @@ class MakeGen:
             if object_files:
                 output_file.write("\trm -f %s\n" % (options.output))
 
-    def __linker_flags(self, link_libs):
+    def __linker_flags(self, options):
         flags = []
-        for lib in link_libs:
+        for lib in options.link_libraries:
             flags.append("-l%s" % (lib))
+        for path in options.library_paths:
+            flags.append("-L%s" % (path))
         return ' '.join(flags)
 
-    def __define_flags(self, defines):
+    def __compiler_flags(self, options):
         flags = []
-        for d in defines:
+        for d in options.defines:
             flags.append("-D%s" % (d))
+        for path in options.include_paths:
+            flags.append("-I%s" % (path))
         return ' '.join(flags)
 
     def __split_extension(self, filename):
@@ -294,6 +300,10 @@ if __name__ == "__main__":
                         help="link to a library")
     parser.add_argument("-D", action="append", dest="defines",
                         help="add a preprocessor definition")
+    parser.add_argument("-L", action="append", dest="library_paths",
+                        help="add a library path")
+    parser.add_argument("-I", action="append", dest="include_paths",
+                        help="add a include path")
     parser.add_argument("-n", "--name", type=str, default="my_project",
                         help="name of the project")
     arg = parser.parse_args()
@@ -308,6 +318,10 @@ if __name__ == "__main__":
         options.link_libraries = arg.link_libraries
     if arg.defines:
         options.defines = arg.defines
+    if arg.library_paths:
+        options.library_paths = arg.library_paths
+    if arg.include_paths:
+        options.include_paths = arg.include_paths
 
     if arg.format in GENERATORS:
         generator = GENERATORS[arg.format]
