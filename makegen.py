@@ -220,7 +220,7 @@ if __name__ == "__main__":
         description="Generate makefile from source files.")
     parser.add_argument("file", type=str, nargs="+",
                         help="source files")
-    parser.add_argument("--exe", type=str, default="a.out",
+    parser.add_argument("-e", "--executable", type=str, default="a.out",
                         help="the name of the output executable")
     parser.add_argument("-f", "--format", default="make",
                         help="format of the output makefile.")
@@ -230,7 +230,7 @@ if __name__ == "__main__":
 
     options = MakeOptions()
     options.sources = arg.file
-    options.executable = arg.exe
+    options.executable = arg.executable
     if arg.link_library:
         options.link_libraries = arg.link_library
 
