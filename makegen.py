@@ -91,6 +91,7 @@ RULE_GENERATORS = [
 
 class MakeOptions:
     def __init__(self):
+        self.project_name = "my_project"
         self.c_compiler = "gcc"
         self.cpp_compiler = "g++"
         self.sources = []
@@ -188,7 +189,7 @@ class CMakeGen:
 
     def generate(self, options):
         with open("CMakeLists.txt", "w") as output_file:
-            output_file.write("project(project_name)\n")
+            output_file.write("project(%1s)\n" % (options.project_name))
             self.__write_defines(output_file, options)
             self.__write_link_libraries(output_file, options)
             self.__write_add_executable(output_file, options)
@@ -238,9 +239,12 @@ if __name__ == "__main__":
                         help="link to a library")
     parser.add_argument("-D", action="append", dest="defines",
                         help="add a preprocessor definition")
+    parser.add_argument("-n", "--name", type=str, default="my_project",
+                        help="name of the project")
     arg = parser.parse_args()
 
     options = MakeOptions()
+    options.project_name = arg.name
     options.sources = arg.file
     options.output = "a.out"
     if arg.output:
