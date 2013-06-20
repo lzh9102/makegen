@@ -290,7 +290,7 @@ if __name__ == "__main__":
                         help="the name of the output executable or library")
     parser.add_argument("-f", "--format", default="make",
                         help="format of the output makefile.")
-    parser.add_argument("-l", "--link-library", action="append",
+    parser.add_argument("-l", action="append", dest="link_libraries",
                         help="link to a library")
     parser.add_argument("-D", action="append", dest="defines",
                         help="add a preprocessor definition")
@@ -304,8 +304,8 @@ if __name__ == "__main__":
     options.output = "a.out"
     if arg.output:
         options.output = arg.output
-    if arg.link_library:
-        options.link_libraries = arg.link_library
+    if arg.link_libraries:
+        options.link_libraries = arg.link_libraries
     if arg.defines:
         options.defines = arg.defines
 
