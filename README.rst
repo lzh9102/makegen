@@ -66,6 +66,12 @@ Options
    Add *definition* to c preprocessor definitions, same as gcc.
    example: ``-DNULL=0``
 
+-L path
+   Add *path* to library path. This option only works in *make* format.
+
+-I path
+   Add *path* to include path. This option only works in *make* format.
+
 Formats
 -------
 
