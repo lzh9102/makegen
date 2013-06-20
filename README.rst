@@ -1,8 +1,6 @@
-=====================================
-MakeGen - A Simple Makefile Generator
-=====================================
-
-Quickly generate makefile for C/C++ source files.
+===========================================================
+MakeGen - Quickly generate makefile for C/C++ source files.
+===========================================================
 
 Introduction
 ============
