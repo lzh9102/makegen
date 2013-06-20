@@ -93,7 +93,6 @@ class MakeOptions:
     def __init__(self):
         self.c_compiler = "gcc"
         self.cpp_compiler = "g++"
-        self.output = None
         self.sources = []
         self.executable = None
         self.link_libraries = []
@@ -122,10 +121,7 @@ class MakeGen:
                 cpp_compiler = options.cpp_compiler
                 object_files.append(base + ".o")
 
-        makefile = options.output
-        if not makefile:
-            makefile = "Makefile"
-        with open(makefile, "w") as output_file:
+        with open("Makefile", "w") as output_file:
             # variables
             if c_compiler:
                 output_file.write("CC=%s\n" % (c_compiler))
@@ -182,10 +178,7 @@ class MakeGen:
 class CMakeGen:
 
     def generate(self, options):
-        cmakelists = options.output
-        if not cmakelists:
-            cmakelists = "CMakeLists.txt"
-        with open(cmakelists, "w") as output_file:
+        with open("CMakeLists.txt", "w") as output_file:
             output_file.write("project(project_name)\n")
             self.__write_link_libraries(output_file, options)
             self.__write_add_executable(output_file, options)
