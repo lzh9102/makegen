@@ -111,6 +111,7 @@ class MakeGen:
         cpp_compiler = None
         object_files = []
         link_libraries = options.link_libraries
+        define_flags = self.__define_flags(options.defines)
 
         for f in options.sources:
             base, ext = self.__split_extension(f)
@@ -125,10 +126,12 @@ class MakeGen:
             # variables
             if c_compiler:
                 output_file.write("CC=%s\n" % (c_compiler))
-                output_file.write("CFLAGS=-g -Wall -O2\n")
+                output_file.write("CFLAGS=-g -Wall -O2 %(DEFINES)s\n"
+                                  % {"DEFINES": define_flags})
             if cpp_compiler:
                 output_file.write("CXX=%s\n" % (cpp_compiler))
-                output_file.write("CXXFLAGS=-g -Wall -O2\n")
+                output_file.write("CXXFLAGS=-g -Wall -O2 %(DEFINES)s\n"
+                                  % {"DEFINES": define_flags})
             if object_files:
                 output_file.write("OBJS=%s\n" % (' '.join(object_files)))
                 output_file.write("LDFLAGS=%s\n"
@@ -161,6 +164,12 @@ class MakeGen:
             flags.append("-l%s" % (lib))
         return ' '.join(flags)
 
+    def __define_flags(self, defines):
+        flags = []
+        for d in defines:
+            flags.append("-D%s" % (d))
+        return ' '.join(flags)
+
     def __split_extension(self, filename):
         name, ext = os.path.splitext(filename)
         ext = ext[1:] # remove leading '.'
@@ -180,6 +189,7 @@ class CMakeGen:
     def generate(self, options):
         with open("CMakeLists.txt", "w") as output_file:
             output_file.write("project(project_name)\n")
+            self.__write_defines(output_file, options)
             self.__write_link_libraries(output_file, options)
             self.__write_add_executable(output_file, options)
 
@@ -194,7 +204,14 @@ class CMakeGen:
             output_file.write("link_libraries(%1s\n" % (options.output))
             for lib in options.link_libraries:
                 output_file.write("\t%1s\n" % (lib))
-        output_file.write(")\n")
+            output_file.write(")\n")
+
+    def __write_defines(self, output_file, options):
+        if options.defines:
+            output_file.write("add_definitions(\n")
+            for d in options.defines:
+                output_file.write("\t-D%1s\n" % (d))
+            output_file.write(")\n")
 
 
 GENERATORS = {
@@ -219,6 +236,8 @@ if __name__ == "__main__":
                         help="format of the output makefile.")
     parser.add_argument("-l", "--link-library", action="append",
                         help="link to a library")
+    parser.add_argument("-D", action="append", dest="defines",
+                        help="add a preprocessor definition")
     arg = parser.parse_args()
 
     options = MakeOptions()
@@ -228,6 +247,8 @@ if __name__ == "__main__":
         options.output = arg.output
     if arg.link_library:
         options.link_libraries = arg.link_library
+    if arg.defines:
+        options.defines = arg.defines
 
     if arg.format in GENERATORS:
         generator = GENERATORS[arg.format]
