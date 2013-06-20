@@ -287,7 +287,7 @@ def list_generators():
         generators.append(gen)
     return ', '.join(generators)
 
-if __name__ == "__main__":
+def build_argument_parser():
     parser = argparse.ArgumentParser(
         description="Generate makefile from source files.")
     parser.add_argument("file", type=str, nargs="+",
@@ -306,8 +306,9 @@ if __name__ == "__main__":
                         help="add a include path")
     parser.add_argument("-n", "--name", type=str, default="my_project",
                         help="name of the project")
-    arg = parser.parse_args()
+    return parser
 
+def build_make_options(arg):
     options = MakeOptions()
     options.project_name = arg.name
     options.sources = arg.file
@@ -322,6 +323,12 @@ if __name__ == "__main__":
         options.library_paths = arg.library_paths
     if arg.include_paths:
         options.include_paths = arg.include_paths
+    return options
+
+if __name__ == "__main__":
+    parser = build_argument_parser()
+    arg = parser.parse_args()
+    options = build_make_options(arg)
 
     if arg.format in GENERATORS:
         generator = GENERATORS[arg.format]
