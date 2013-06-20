@@ -111,6 +111,7 @@ class MakeGen:
         c_compiler = None
         cpp_compiler = None
         object_files = []
+        link_libraries = options.link_libraries
 
         for f in options.sources:
             base, ext = self.__split_extension(f)
@@ -134,7 +135,8 @@ class MakeGen:
                 output_file.write("CXXFLAGS=-g -Wall -O2\n")
             if object_files:
                 output_file.write("OBJS=%s\n" % (' '.join(object_files)))
-                output_file.write("LDFLAGS=\n")
+                output_file.write("LDFLAGS=%s\n"
+                                  % (self.__linker_flags(link_libraries)))
             output_file.write("\n")
 
             # executable
@@ -156,6 +158,12 @@ class MakeGen:
                 output_file.write("\trm -f %s\n" % (f)) # remove *.o
             if object_files:
                 output_file.write("\trm -f %s\n" % (options.executable))
+
+    def __linker_flags(self, link_libs):
+        flags = []
+        for lib in link_libs:
+            flags.append("-l%s" % (lib))
+        return ' '.join(flags)
 
     def __split_extension(self, filename):
         name, ext = os.path.splitext(filename)
@@ -179,10 +187,22 @@ class CMakeGen:
             cmakelists = "CMakeLists.txt"
         with open(cmakelists, "w") as output_file:
             output_file.write("project(project_name)\n")
-            output_file.write("add_executable(%1s\n" % (options.executable))
-            for f in options.sources:
-                output_file.write("\t%1s\n" % (f))
-            output_file.write(")\n")
+            self.__write_link_libraries(output_file, options)
+            self.__write_add_executable(output_file, options)
+
+    def __write_add_executable(self, output_file, options):
+        output_file.write("add_executable(%1s\n" % (options.executable))
+        for f in options.sources:
+            output_file.write("\t%1s\n" % (f))
+        output_file.write(")\n")
+
+    def __write_link_libraries(self, output_file, options):
+        if options.link_libraries:
+            output_file.write("link_libraries(%1s\n" % (options.executable))
+            for lib in options.link_libraries:
+                output_file.write("\t%1s\n" % (lib))
+        output_file.write(")\n")
+
 
 GENERATORS = {
     "make": MakeGen(),
@@ -204,11 +224,15 @@ if __name__ == "__main__":
                         help="the name of the output executable")
     parser.add_argument("-f", "--format", default="make",
                         help="format of the output makefile.")
+    parser.add_argument("-l", "--link-library", action="append",
+                        help="link to a library")
     arg = parser.parse_args()
 
     options = MakeOptions()
     options.sources = arg.file
     options.executable = arg.exe
+    if arg.link_library:
+        options.link_libraries = arg.link_library
 
     if arg.format in GENERATORS:
         generator = GENERATORS[arg.format]
