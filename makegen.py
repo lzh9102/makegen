@@ -94,7 +94,7 @@ class MakeOptions:
         self.c_compiler = "gcc"
         self.cpp_compiler = "g++"
         self.sources = []
-        self.executable = None
+        self.output = None
         self.link_libraries = []
         self.defines = []
 
@@ -137,12 +137,12 @@ class MakeGen:
 
             # executable
             if object_files:
-                output_file.write("%1s: $(OBJS)\n" % (options.executable))
+                output_file.write("%1s: $(OBJS)\n" % (options.output))
                 linker = "$(CC)"
                 if cpp_compiler:
                     linker = "$(CXX)"
                 output_file.write("\t%1s -o %2s $(LDFLAGS) $(OBJS)\n\n"
-                                  % (linker, options.executable))
+                                  % (linker, options.output))
 
             # object files
             for f in options.sources:
@@ -153,7 +153,7 @@ class MakeGen:
             for f in object_files:
                 output_file.write("\trm -f %s\n" % (f)) # remove *.o
             if object_files:
-                output_file.write("\trm -f %s\n" % (options.executable))
+                output_file.write("\trm -f %s\n" % (options.output))
 
     def __linker_flags(self, link_libs):
         flags = []
@@ -184,14 +184,14 @@ class CMakeGen:
             self.__write_add_executable(output_file, options)
 
     def __write_add_executable(self, output_file, options):
-        output_file.write("add_executable(%1s\n" % (options.executable))
+        output_file.write("add_executable(%1s\n" % (options.output))
         for f in options.sources:
             output_file.write("\t%1s\n" % (f))
         output_file.write(")\n")
 
     def __write_link_libraries(self, output_file, options):
         if options.link_libraries:
-            output_file.write("link_libraries(%1s\n" % (options.executable))
+            output_file.write("link_libraries(%1s\n" % (options.output))
             for lib in options.link_libraries:
                 output_file.write("\t%1s\n" % (lib))
         output_file.write(")\n")
@@ -213,8 +213,8 @@ if __name__ == "__main__":
         description="Generate makefile from source files.")
     parser.add_argument("file", type=str, nargs="+",
                         help="source files")
-    parser.add_argument("-e", "--executable", type=str, default="a.out",
-                        help="the name of the output executable")
+    parser.add_argument("-o", "--output", type=str, default=None,
+                        help="the name of the output executable or library")
     parser.add_argument("-f", "--format", default="make",
                         help="format of the output makefile.")
     parser.add_argument("-l", "--link-library", action="append",
@@ -223,7 +223,9 @@ if __name__ == "__main__":
 
     options = MakeOptions()
     options.sources = arg.file
-    options.executable = arg.executable
+    options.output = "a.out"
+    if arg.output:
+        options.output = arg.output
     if arg.link_library:
         options.link_libraries = arg.link_library
 
