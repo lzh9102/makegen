@@ -5,18 +5,39 @@ import os
 import re
 import argparse
 
-class DependencyFinder:
-
-    def handled_extensions(self):
-        return []
-
-    def find_dependency(self, filename):
-        return []
-
-class C_DependencyFinder(DependencyFinder):
+class C_DependencyFinder:
 
     def handled_extensions(self):
         return {"c", "cpp", "cxx", "cc", "h", "hpp"}
+
+    # ------ multiple files ------
+
+    def find_dependencies(self, files):
+        dep_map = {}
+        for f in files:
+            self.__find_dependency_for_file(f, dep_map)
+        return dep_map
+
+    def __find_dependency_for_file(self, filename, dep_map):
+        if filename in dep_map:
+            return dep_map[filename]
+        deps = set([filename])
+        directory = os.path.dirname(filename)
+        try:
+            with open(filename, "r") as input_file:
+                for line in input_file:
+                    include_file = self.__extract_include_file(line)
+                    if include_file:
+                        include_file = os.path.join(directory, include_file)
+                        incdeps = self.__find_dependency_for_file(
+                                                       include_file, dep_map)
+                        deps = deps.union(incdeps)
+        except:
+            pass
+        dep_map[filename] = deps
+        return deps
+
+    # ------ single file ------
 
     def find_dependency(self, filename):
         dep_set = set()
@@ -202,8 +223,10 @@ class CMakeGen:
 
     def __write_add_executable(self, output_file, options):
         output_file.write("add_executable(%1s\n" % (options.output))
-        for f in options.sources:
-            output_file.write("\t%1s\n" % (f))
+        dep_map = C_DependencyFinder().find_dependencies(options.sources)
+        for f in dep_map:
+            if os.path.exists(f): # exclude non-existing files
+                output_file.write("\t%1s\n" % (f))
         output_file.write(")\n")
 
     def __write_link_libraries(self, output_file, options):
@@ -262,12 +285,16 @@ class AutoMakeGen:
 
     def __write_sources(self, output_file, options, bin_filename):
         output_file.write("%s_SOURCES = \\\n" % (bin_filename))
-        last_index = len(options.sources) - 1
+        files = list(C_DependencyFinder().find_dependencies(options.sources))
+        last_index = len(files) - 1
         for i in range(0, last_index):
-            source = options.sources[i]
-            output_file.write("\t%s \\\n" % (source))
+            source = files[i]
+            if os.path.exists(source):
+                output_file.write("\t%s \\\n" % (source))
         if last_index >= 0:
-            output_file.write("\t%s\n" % (options.sources[last_index]))
+            source = files[last_index]
+            if os.path.exists(source):
+                output_file.write("\t%s\n" % (source))
 
     def __write_ldadd(self, output_file, options, bin_filename):
         output_file.write("%s_LDADD =" % (bin_filename))
