@@ -64,6 +64,18 @@ Options
    Add *definition* to c preprocessor definitions, same as gcc.
    example: ``-DNULL=0``
 
+--cflags=flags
+   Pass *flags* to c compiler. This option only works in *make* and *automake*
+   formats. example: ``--cflags='-g -O2 -Wall'``
+
+--cxxflags=flags
+   Pass *flags* to c++ compiler. This option only works in *make* and
+   *automake* formats. example: ``--cxxflags='-g -O2 -Wall'``
+
+--ldflags=flags
+   Pass *flags* to linker. This option only works in *make* and *automake*
+   formats. example: ``--ldflags='-pg'``
+
 -L path
    Add *path* to library path. This option only works in *make* format.
 
