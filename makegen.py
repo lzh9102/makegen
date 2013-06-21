@@ -264,6 +264,8 @@ class AutoMakeGen:
                 self.__write_cflags(output_file, options, bin_filename)
             if self.__contains_cpp(options):
                 self.__write_cxxflags(output_file, options, bin_filename)
+            if options.ldflags:
+                self.__write_ldflags(output_file, options, bin_filename)
             if options.link_libraries:
                 self.__write_ldadd(output_file, options, bin_filename)
 
@@ -279,18 +281,25 @@ class AutoMakeGen:
                 return True
         return False
 
-    def __write_flags(self, output_file, options, bin_filename, flag):
-        output_file.write("%1s_%2s = " % (bin_filename, flag))
-        output_file.write("-g -O2 -Wall")
+    def __write_flags(self, output_file, options,
+                      bin_filename, flagname, flags):
+        output_file.write("%1s_%2s = " % (bin_filename, flagname))
+        output_file.write(flags)
         for define in options.defines:
             output_file.write(" -D%s" % (define))
         output_file.write("\n")
 
     def __write_cflags(self, output_file, options, bin_filename):
-        self.__write_flags(output_file, options, bin_filename, "CFLAGS")
+        self.__write_flags(output_file, options, bin_filename, "CFLAGS",
+                           options.cflags)
 
     def __write_cxxflags(self, output_file, options, bin_filename):
-        self.__write_flags(output_file, options, bin_filename, "CXXFLAGS")
+        self.__write_flags(output_file, options, bin_filename, "CXXFLAGS",
+                           options.cxxflags)
+
+    def __write_ldflags(self, output_file, options, bin_filename):
+        self.__write_flags(output_file, options, bin_filename, "LDFLAGS",
+                           options.ldflags)
 
     def __write_sources(self, output_file, options, bin_filename):
         output_file.write("%s_SOURCES = \\\n" % (bin_filename))
