@@ -41,7 +41,10 @@ class C_DependencyFinder:
 
     def find_dependency(self, filename):
         dep_set = set()
-        self.__find_dependency(filename, dep_set)
+        try:
+            self.__find_dependency(filename, dep_set)
+        except IOError:
+            print("error: failed to open file: %s" % filename)
         return [filename] + list(dep_set)
 
     def __find_dependency(self, filename, dep_set):
