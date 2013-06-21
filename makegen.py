@@ -121,6 +121,9 @@ class MakeOptions:
         self.defines = []
         self.library_paths = []
         self.include_paths = []
+        self.cflags = "-g -O2 -Wall"
+        self.cxxflags = "-g -O2 -Wall"
+        self.ldflags = ""
 
 class MakeGen:
 
@@ -150,16 +153,19 @@ class MakeGen:
             # variables
             if c_compiler:
                 output_file.write("CC=%s\n" % (c_compiler))
-                output_file.write("CFLAGS=-g -Wall -O2 %(FLAGS)s\n"
-                                  % {"FLAGS": compiler_flags})
+                output_file.write("CFLAGS=%(CFLAGS)s %(FLAGS)s\n"
+                                  % {"FLAGS": compiler_flags,
+                                     "CFLAGS": options.cflags})
             if cpp_compiler:
                 output_file.write("CXX=%s\n" % (cpp_compiler))
-                output_file.write("CXXFLAGS=-g -Wall -O2 %(FLAGS)s\n"
-                                  % {"FLAGS": compiler_flags})
+                output_file.write("CXXFLAGS=%(CXXFLAGS)s %(FLAGS)s\n"
+                                  % {"FLAGS": compiler_flags,
+                                     "CXXFLAGS": options.cxxflags})
             if object_files:
                 output_file.write("OBJS=%s\n" % (' '.join(object_files)))
-                output_file.write("LDFLAGS=%s\n"
-                                  % (self.__linker_flags(options)))
+                output_file.write("LDFLAGS=%(LDFLAGS)s %(FLAGS)s\n"
+                                  % {"FLAGS": self.__linker_flags(options),
+                                     "LDFLAGS": options.ldflags})
             output_file.write("\n")
 
             # executable
@@ -333,6 +339,12 @@ def build_argument_parser():
                         help="add a include path")
     parser.add_argument("-n", "--name", type=str, default="my_project",
                         help="name of the project")
+    parser.add_argument("--cflags", type=str, default=None,
+                        help="c compiler flags")
+    parser.add_argument("--cxxflags", type=str, default=None,
+                        help="c++ compiler flags")
+    parser.add_argument("--ldflags", type=str, default=None,
+                        help="linker flags")
     return parser
 
 def build_make_options(arg):
@@ -350,6 +362,12 @@ def build_make_options(arg):
         options.library_paths = arg.library_paths
     if arg.include_paths:
         options.include_paths = arg.include_paths
+    if arg.cflags:
+        options.cflags = arg.cflags
+    if arg.cxxflags:
+        options.cxxflags = arg.cxxflags
+    if arg.ldflags:
+        options.ldflags = arg.ldflags
     return options
 
 if __name__ == "__main__":
