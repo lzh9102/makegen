@@ -37,9 +37,7 @@ Usage
 
 .. code::
    
-   makegen.py [-h] [-o output] [-f format] [-l library] [-D definition]
-              [-n name]
-              file1 [file2 ...]
+   makegen.py [options] <source files>
 
 Options
 -------
