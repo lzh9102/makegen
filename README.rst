@@ -97,6 +97,10 @@ automake
 Copyright
 =========
 
-To the extent possible under law, the author(s) have dedicated all copyright
-and related and neighboring rights to this software to the public domain
-worldwide. This software is distributed without any warranty. 
+Copyright 2013 Che-Huai Lin
+
+This work is licensed under `CC BY 3.0`_.
+
+.. _`CC BY 3.0`: http://creativecommons.org/licenses/by/3.0/
+
+.. image:: http://i.creativecommons.org/l/by/3.0/88x31.png

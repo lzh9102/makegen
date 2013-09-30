@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# quickly generate makefile for c/c++ source files
 
 import sys
 import os
