@@ -171,6 +171,12 @@ class MakeGen:
                                      "LDFLAGS": options.ldflags})
             output_file.write("\n")
 
+            # all
+            if object_files:
+                output_file.write("all: %1s\n\n" % options.output)
+            else:
+                output_file.write("all:\n\n")
+
             # executable
             if object_files:
                 output_file.write("%1s: $(OBJS)\n" % (options.output))
