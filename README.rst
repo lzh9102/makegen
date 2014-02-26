@@ -2,36 +2,6 @@
 MakeGen - Quickly generate makefile for C/C++ source files.
 ===========================================================
 
-Introduction
-============
-
-Writing makefile for C/C++ projects can be a repetitive and cumbersome work. If
-an included header is omitted in the dependency list, the source file may not
-be rebuilt when the header is modified. This may cause runtime failure because
-of inconsistencies between object files. On the other hand, superfluous
-dependency list will significantly slow down the build process.
-
-The problem can be addressed by using building systems like CMake_ or
-Autotools_. These tools are invaluable in C/C++ project development, but they
-can be too complex or may introduce additional dependency for very simple
-projects.  For example, autotools requires at least 2 configuration files (one
-for autoconf and the other for automake) and has a rather complex workflow.
-Using CMake is easier but requires cmake to be installed on the user's system.
-
-.. _CMake: http://www.cmake.org/
-.. _Autotools: http://en.wikipedia.org/wiki/GNU_build_system
-
-To balance between hand-written makefiles and full-fledged build systems, I
-wrote this tool to ease the process of writing simple makefiles. It
-automatically generates makefiles that are as simple and readable as those
-hand-written ones. The generated makefile does not depend on this script.
-
-Makegen doesn't support custom targets (e.g. generating source files by perl
-scripts). If you need such flexibility, please use a real build system instead.
-If you decide to convert to cmake or autotools, you can generate CMakeLists.txt
-and Makefile.am by ``makegen -f cmake <srcfiles>`` and ``makegen -f automake
-<srcfiles>`` respectively.
-
 Usage
 =====
 
@@ -93,6 +63,50 @@ cmake
    
 automake
    Generate *Makefile.am*.
+
+Examples
+========
+
+.. code::
+
+   # create Makefile to compile main.c and library.c into a.out
+   makegen.py -o a.out main.c library.c library.h
+
+   # link libpthread and #define THREAD_COUNT 4
+   makegen.py -DTHREAD_COUNT=4 -lpthread main.c
+
+   # create CMakeLists.txt
+   makegen.py -f cmake main.c foo.c bar.c foo.h bar.h
+
+Description
+===========
+
+Writing makefile for C/C++ projects can be a repetitive and cumbersome work. If
+an included header is omitted in the dependency list, the source file may not
+be rebuilt when the header is modified. This may cause runtime failure because
+of inconsistencies between object files. On the other hand, superfluous
+dependency list will significantly slow down the build process.
+
+The problem can be addressed by using building systems like CMake_ or
+Autotools_. These tools are invaluable in C/C++ project development, but they
+can be too complex or may introduce additional dependency for very simple
+projects.  For example, autotools requires at least 2 configuration files (one
+for autoconf and the other for automake) and has a rather complex workflow.
+Using CMake is easier but requires cmake to be installed on the user's system.
+
+.. _CMake: http://www.cmake.org/
+.. _Autotools: http://en.wikipedia.org/wiki/GNU_build_system
+
+To balance between hand-written makefiles and full-fledged build systems, I
+wrote this tool to ease the process of writing simple makefiles. It
+automatically generates makefiles that are as simple and readable as those
+hand-written ones. The generated makefile does not depend on this script.
+
+Makegen doesn't support custom targets (e.g. generating source files by perl
+scripts). If you need such flexibility, please use a real build system instead.
+If you decide to convert to cmake or autotools, you can generate CMakeLists.txt
+and Makefile.am by ``makegen -f cmake <srcfiles>`` and ``makegen -f automake
+<srcfiles>`` respectively.
 
 Copyright
 =========
