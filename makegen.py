@@ -9,7 +9,7 @@ import argparse
 class C_DependencyFinder:
 
     def handled_extensions(self):
-        return {"c", "cpp", "cxx", "cc", "h", "hpp"}
+        return set(["c", "cpp", "cxx", "cc", "h", "hpp"])
 
     # ------ multiple files ------
 
@@ -74,7 +74,7 @@ class C_DependencyFinder:
 
 class RuleGenerator:
     def handled_extensions(self):
-        return {}
+        return set()
     def generate_rule(self, filename):
         return ""
 
@@ -92,19 +92,19 @@ def generate_source_to_object_rule(filename, compiler, flags):
 
 class C_RuleGenerator(RuleGenerator):
     def handled_extensions(self):
-        return {"c"}
+        return set(["c"])
     def generate_rule(self, filename):
         return generate_source_to_object_rule(filename, "$(CC)", "$(CFLAGS)")
 
 class CPP_RuleGenerator(RuleGenerator):
     def handled_extensions(self):
-        return {"cpp", "cxx", "cc"}
+        return set(["cpp", "cxx", "cc"])
     def generate_rule(self, filename):
         return generate_source_to_object_rule(filename, "$(CXX)", "$(CXXFLAGS)")
 
 class HEADER_RuleGenerator(RuleGenerator):
     def handled_extensions(self):
-        return {"h", "hpp"}
+        return set(["h", "hpp"])
     def generate_rule(self, filename):
         return "" # header files don't need to be compiled
 
